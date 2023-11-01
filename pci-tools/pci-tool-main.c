@@ -32,7 +32,7 @@ int print_cmd_menu(void) {
 		menu_cnt_max = i;
 	}
 
-	printf("\nPlease type the command number and press ENTER: \n");
+	printf("\nPlease type the command number and press ENTER: ");
 	scanf("%d", &menu_cmd);
 	if ((menu_cmd < 0) || (menu_cmd > menu_cnt_max)) {
 		printf("ERROR: There is no such menu with number %d!\n", menu_cmd);
@@ -42,6 +42,7 @@ int print_cmd_menu(void) {
 	return menu_cmd;
 }
 
+
 void handle_cmd_menu(int cmd) {
 	switch (cmd) {
 		case MENU_DEVICE_SELECT:
@@ -49,6 +50,7 @@ void handle_cmd_menu(int cmd) {
 			printf("\nDevice selected is: %s\n", PCIeDevAddr);
 			break;
 		case MENU_PRINT_CONFIG:
+			cmd_print_configs(PCIeDevAddr);
 			break;
 		default:
 			break;

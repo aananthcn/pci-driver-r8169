@@ -5,6 +5,7 @@
 
 // local file includes
 #include "pci-commands.h"
+#include "sys-utils.h"
 
 // macros
 #define MAXLINES	(256)
@@ -64,4 +65,40 @@ void cmd_select_device(char dev_addr[]) {
 	{
 		free(output[i]); // Free allocated memory
 	}
+}
+
+
+void cmd_print_configs(const char dev_addr[]) {
+	int bytes_read;
+	char file_name[128] = "/sys/bus/pci/devices/0000:";
+	unsigned char *buffer = NULL;
+
+	// formulate the filename with path to read the config
+	strcat(file_name, dev_addr);
+	strcat(file_name, "/config");
+	printf("\nReading file: %s\n", file_name);
+
+	// read the file contents into the buffer passed by argument
+	bytes_read = read_binary_file(file_name, &buffer);
+	printf("Bytes read = %d\n", bytes_read);
+	dump_buffer_hex(buffer, bytes_read);
+
+	// read PCI configs
+	unsigned short vendor_id = buffer[0] | (buffer[1] << 8);
+	unsigned short device_id = buffer[2] | (buffer[3] << 8);
+	unsigned short cmd_reg   = buffer[4] | (buffer[5] << 8);
+	unsigned short stat_reg  = buffer[6] | (buffer[7] << 8);
+	unsigned char  rev_id    = buffer[8];
+
+	// free the buffer allocated by read_binary_file function
+	if (buffer)
+		free(buffer);
+
+	// print configs
+	printf("\n");
+	printf("Vendor ID   : 0x%X\n", vendor_id);
+	printf("Device ID   : 0x%X\n", device_id);
+	printf("Command Reg : 0x%X\n", cmd_reg);
+	printf("Status Reg  : 0x%X\n", stat_reg);
+	printf("Revision ID : %d\n", rev_id);
 }
