@@ -13,7 +13,7 @@ PCIETOOLS_OBJS := \
 LDFLAGS := -g
 CFLAGS  := -Werror ${INCDIRS} -g
 ASFLAGS := ${INCDIRS} -g
-TARGET 	:= pcie-analyzer
+TARGET 	:= pcie-analyzer.exe
 
 
 all: $(TARGET)
