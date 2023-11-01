@@ -7,7 +7,8 @@ $(info compiling pcie-tools)
 
 
 PCIETOOLS_OBJS := \
-	pci-config-reader.o
+	pci-commands.o \
+	pci-tool-main.o
 
 
 LDFLAGS := -g

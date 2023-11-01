@@ -1,14 +1,17 @@
+/* This file contains the implementations of menu commands */
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
-// Macros
+// local file includes
+#include "pci-commands.h"
+
+// macros
 #define MAXLINES	(256)
-#define PDEV_ADDR_LEN	(32)
 
 
 // Function to execute a system command and collect output
-void execute_command(const char *cmd, char *output[], int maxLines)
+static void sys_coommand(const char *cmd, char *output[], int maxLines)
 {
 	FILE *pipe = popen(cmd, "r");
 	if (!pipe)
@@ -34,21 +37,26 @@ void execute_command(const char *cmd, char *output[], int maxLines)
 }
 
 
-void select_device(char *output[], char dev_addr[]) {
-	int device_num;
+void cmd_select_device(char dev_addr[]) {
+	int device_num, max_dev_num;
+	char *output[MAXLINES] = { NULL };
+	char command[] = "lspci";
 
-	if ((output == NULL) || (dev_addr == NULL)) {
-		printf("ERROR: %s(): invalid arguments!\n", __func__);
-		exit(1);
-	}
+	sys_coommand(command, output, MAXLINES);
+	printf("\n\nPCIe Devices List:\n------------------\n");
 
 	for (int i = 0; i < MAXLINES && output[i] != NULL; i++)
 	{
-		printf("[%2d] %s\n", i, output[i]);
+		printf("  [%2d] %s\n", i+1, output[i]);
+		max_dev_num = i+1;
 	}
-	printf("\n\nType the device number and press ENTER: ");
+	printf("\nType the device number and press ENTER: ");
 	scanf("%d", &device_num);
-	strcpy(dev_addr, strtok(output[device_num], " "));
+	if ((device_num < 1) || (device_num > max_dev_num)) {
+		printf("ERROR: There is no such device with number %d!\n", device_num);
+		exit(1);
+	}
+	strcpy(dev_addr, strtok(output[device_num-1], " "));
 
 
 	// free the memory created by strdup() here, to avoid memory leak
@@ -56,21 +64,4 @@ void select_device(char *output[], char dev_addr[]) {
 	{
 		free(output[i]); // Free allocated memory
 	}
-}
-
-
-int main()
-{
-	char *output[MAXLINES] = { NULL };
-	char command[MAXLINES];
-	char pdev_addr[PDEV_ADDR_LEN];
-
-	strcpy(command, "lspci");
-	execute_command(command, output, MAXLINES);
-	select_device(output, pdev_addr);
-
-	printf("\nDevice selected is: %s\n", pdev_addr);
-
-
-	return 0;
 }
