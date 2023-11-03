@@ -55,6 +55,8 @@ void handle_cmd_menu(int cmd) {
 			cmd_get_configs(PCIeDevAddr, &pci_config);
 			cmd_print_configs(stdout, &pci_config, "\n");
 			break;
+		case MENU_READ_ALL_CFG2FILE:
+			cmd_read_all_configs_to_file();
 		default:
 			printf("\nThe command selected (%d) is not supported yet!\n", cmd);
 			break;

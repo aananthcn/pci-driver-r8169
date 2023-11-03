@@ -176,3 +176,31 @@ void cmd_print_configs(FILE *fp, pci_config_t *pconf, const char *sep) {
 	if (strcmp(sep, "\n"))
 		fprintf(fp, "\n");
 }
+
+void cmd_read_all_configs_to_file(void) {
+	char dev_addr[32];
+	pci_config_t pci_config;
+	char *output[MAXLINES] = { NULL };
+	char command[] = "lspci";
+
+	// open file for writing the output
+	FILE *fp = fopen("pci-configs.csv", "w");
+	if (fp == NULL) {
+		printf("Error: Can't open pci-configs.csv\n");
+		exit(1);
+	}
+
+	// read pci data of all device and write them to output file
+	sys_command(command, output, MAXLINES);
+	for (int i = 0; i < MAXLINES && output[i] != NULL; i++) {
+		strcpy(dev_addr, strtok(output[i], " "));
+		cmd_get_configs(dev_addr, &pci_config);
+		// print them horizontally with comma as separator
+		cmd_print_configs(fp, &pci_config, "| ");
+		// insert a newline once all parameters are written
+		//fprintf(fp, "\n");
+	}
+
+	if(fp)
+		fclose(fp);
+}
