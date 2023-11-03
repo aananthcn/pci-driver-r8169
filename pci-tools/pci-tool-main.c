@@ -57,6 +57,7 @@ void handle_cmd_menu(int cmd) {
 			break;
 		case MENU_READ_ALL_CFG2FILE:
 			cmd_read_all_configs_to_file();
+			break;
 		default:
 			printf("\nThe command selected (%d) is not supported yet!\n", cmd);
 			break;
