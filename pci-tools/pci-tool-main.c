@@ -24,7 +24,8 @@ char *PCIeToolMenu[] = {
 
 
 int print_cmd_menu(void) {
-	int menu_cmd, menu_cnt_max;
+	int menu_cnt_max;
+	int menu_cmd = -1;
 
 	printf("\n\nMenu Command List:\n------------------\n\n");
 	for (int i = 0; PCIeToolMenu[i]; i++) {

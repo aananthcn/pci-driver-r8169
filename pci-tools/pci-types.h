@@ -3,9 +3,9 @@
 
 typedef struct {
 	unsigned short vendor_id;
-	char vendor_str[128];
 	unsigned short device_id;
-	char device_str[128];
+	char device_str[256];
+	char device_type[128];
 	unsigned short cmd_reg;
 	unsigned short stat_reg;
 	unsigned char  rev_id;

@@ -13,7 +13,7 @@
 
 
 // Function to execute a system command and collect output
-static void sys_coommand(const char *cmd, char *output[], int maxLines)
+static void sys_command(const char *cmd, char *output[], int maxLines)
 {
 	FILE *pipe = popen(cmd, "r");
 	if (!pipe)
@@ -44,7 +44,7 @@ void cmd_select_device(char dev_addr[]) {
 	char *output[MAXLINES] = { NULL };
 	char command[] = "lspci";
 
-	sys_coommand(command, output, MAXLINES);
+	sys_command(command, output, MAXLINES);
 	printf("\n\nPCIe Devices List:\n------------------\n");
 
 	for (int i = 0; i < MAXLINES && output[i] != NULL; i++)
@@ -69,6 +69,34 @@ void cmd_select_device(char dev_addr[]) {
 }
 
 
+void get_dev_details(const char dev_addr[], pci_config_t *pconf) {
+	char *output[MAXLINES] = { NULL };
+	char command[32] = "lspci -s ";
+	strcat(command, dev_addr);
+	sys_command(command, output, MAXLINES);
+	char* token = strtok(output[0], " ");
+	for (int i = 0; token != NULL; i++) {
+		token = strtok(NULL, ":");
+		if (i == 0) {
+			// get the device type
+			strcpy(pconf->device_type, token);
+		}
+		else if (i == 1) {
+			// remove the leading space
+			if (token[0] == ' ')
+				token++;
+			// get the device details
+			strcpy(pconf->device_str, token);
+			break;
+		}
+		else {
+			break;
+		}
+	}
+
+}
+
+
 int cmd_get_configs(const char dev_addr[], pci_config_t *pconf) {
 	int bytes_read;
 	char file_name[128] = "/sys/bus/pci/devices/0000:";
@@ -83,6 +111,9 @@ int cmd_get_configs(const char dev_addr[], pci_config_t *pconf) {
 	bytes_read = read_binary_file(file_name, &buffer);
 	printf("Bytes read = %d\n", bytes_read);
 	dump_buffer_hex(buffer, bytes_read);
+
+	// acquire text information related to this device
+	get_dev_details(dev_addr, pconf);
 
 	// read PCI configs - PCIe bytes are always Little Endian
 	pconf->vendor_id  = buffer[0] | (buffer[1] << 8);
@@ -120,6 +151,8 @@ void cmd_print_configs(FILE *fp, pci_config_t *pconf, const char *sep) {
 	// print configs
 	fprintf(fp, "Vendor ID       : 0x%X%s",  pconf->vendor_id, sep);
 	fprintf(fp, "Device ID       : 0x%X%s",  pconf->device_id, sep);
+	fprintf(fp, "Device Type     : %s%s",    pconf->device_type, sep);
+	fprintf(fp, "Device Details  : %s%s",    pconf->device_str, sep);
 	fprintf(fp, "Command Reg     : 0x%X%s",  pconf->cmd_reg, sep);
 	fprintf(fp, "Status Reg      : 0x%X%s",  pconf->stat_reg, sep);
 	fprintf(fp, "Revision ID     : %d%s",    pconf->rev_id, sep);
