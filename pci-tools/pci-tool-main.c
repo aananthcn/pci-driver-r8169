@@ -53,6 +53,7 @@ void handle_cmd_menu(int cmd) {
 			cmd_print_configs(PCIeDevAddr);
 			break;
 		default:
+			printf("\nThe command selected (%d) is not supported yet!\n", cmd);
 			break;
 	}
 }
