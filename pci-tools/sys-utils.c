@@ -54,5 +54,5 @@ void dump_buffer_hex(const void *buffer, size_t size)
 
 		printf("%02X ", bytes[i]);
 	}
-	printf("\n");
+	printf("\n\n");
 }
