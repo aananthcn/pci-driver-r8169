@@ -147,35 +147,83 @@ int cmd_get_configs(const char dev_addr[], pci_config_t *pconf) {
 }
 
 
-void cmd_print_configs(FILE *fp, pci_config_t *pconf, const char *sep) {
+const char *PCIe_Params[] = {
+	"Vendor ID       : ", /*  0 */
+	"Device ID       : ", /*  1 */
+	"Device Type     : ", /*  2 */
+	"Device Details  : ", /*  3 */
+	"Command Reg     : ", /*  4 */
+	"Status Reg      : ", /*  5 */
+	"Revision ID     : ", /*  6 */
+	"Class Code      : ", /*  7 */
+	"Cache Line      : ", /*  8 */
+	"Latency Timer   : ", /*  9 */
+	"Header Type     : ", /* 10 */
+	"BIST            : ", /* 11 */
+	"BAR0            : ", /* 12 */
+	"BAR1            : ", /* 13 */
+	"BAR2            : ", /* 14 */
+	"BAR3            : ", /* 15 */
+	"BAR4            : ", /* 16 */
+	"BAR5            : ", /* 17 */
+	"Cardbus CIS Ptr : ", /* 18 */
+	"Subs. Vendor ID : ", /* 19 */
+	"Subs. Device ID : ", /* 20 */
+	"IRQ Line        : ", /* 21 */
+	"IRQ Pin         : "  /* 22 */
+};
+
+void cmd_print_configs(FILE *fp, pci_config_t *pconf, prnt_t prnt_dir) {
+	char sep[16];
+
+	// prepare the separator string for each parameter
+	if (prnt_dir == PRNT_COL ) {
+		strcpy(sep, "\n");
+	}
+	else {
+		strcpy(sep, "|");
+	}
+
 	// print configs
-	fprintf(fp, "Vendor ID       : 0x%X%s",  pconf->vendor_id, sep);
-	fprintf(fp, "Device ID       : 0x%X%s",  pconf->device_id, sep);
-	fprintf(fp, "Device Type     : %s%s",    pconf->device_type, sep);
-	fprintf(fp, "Device Details  : %s%s",    pconf->device_str, sep);
-	fprintf(fp, "Command Reg     : 0x%X%s",  pconf->cmd_reg, sep);
-	fprintf(fp, "Status Reg      : 0x%X%s",  pconf->stat_reg, sep);
-	fprintf(fp, "Revision ID     : %d%s",    pconf->rev_id, sep);
-	fprintf(fp, "Class Code      : 0x%X%s",  pconf->class_code, sep);
-	fprintf(fp, "Cache Line      : 0x%X%s",  pconf->cache_line, sep);
-	fprintf(fp, "Latency Timer   : 0x%X%s",  pconf->lat_timer, sep);
-	fprintf(fp, "Header Type     : 0x%X%s",  pconf->hdr_type, sep);
-	fprintf(fp, "BIST            : 0x%X%s",  pconf->bist, sep);
-	fprintf(fp, "BAR0            : 0x%X%s",  pconf->bar0, sep);
-	fprintf(fp, "BAR1            : 0x%X%s",  pconf->bar1, sep);
-	fprintf(fp, "BAR2            : 0x%X%s",  pconf->bar2, sep);
-	fprintf(fp, "BAR3            : 0x%X%s",  pconf->bar3, sep);
-	fprintf(fp, "BAR4            : 0x%X%s",  pconf->bar4, sep);
-	fprintf(fp, "BAR5            : 0x%X%s",  pconf->bar5, sep);
-	fprintf(fp, "Cardbus CIS Ptr : 0x%X%s",  pconf->card_bus_p, sep);
-	fprintf(fp, "Subs. Vendor ID : 0x%X%s",  pconf->subsys_vid, sep);
-	fprintf(fp, "Subs. Device ID : 0x%X%s",  pconf->subsys_did, sep);
-	fprintf(fp, "IRQ Line        : 0x%X%s",  pconf->irq_line, sep);
-	fprintf(fp, "IRQ Pin         : 0x%X%s",  pconf->irq_pin, sep);
+	fprintf(fp, "%s0x%X%s",  ((prnt_dir == PRNT_COL) ? PCIe_Params[0] : ""), pconf->vendor_id, sep);
+	fprintf(fp, "%s0x%X%s",  ((prnt_dir == PRNT_COL) ? PCIe_Params[1] : ""), pconf->device_id, sep);
+	fprintf(fp, "%s%s%s",    ((prnt_dir == PRNT_COL) ? PCIe_Params[2] : ""), pconf->device_type, sep);
+	fprintf(fp, "%s%s%s",    ((prnt_dir == PRNT_COL) ? PCIe_Params[3] : ""), pconf->device_str, sep);
+	fprintf(fp, "%s0x%X%s",  ((prnt_dir == PRNT_COL) ? PCIe_Params[4] : ""), pconf->cmd_reg, sep);
+	fprintf(fp, "%s0x%X%s",  ((prnt_dir == PRNT_COL) ? PCIe_Params[5] : ""), pconf->stat_reg, sep);
+	fprintf(fp, "%s%d%s",    ((prnt_dir == PRNT_COL) ? PCIe_Params[6] : ""), pconf->rev_id, sep);
+	fprintf(fp, "%s0x%X%s",  ((prnt_dir == PRNT_COL) ? PCIe_Params[7] : ""), pconf->class_code, sep);
+	fprintf(fp, "%s0x%X%s",  ((prnt_dir == PRNT_COL) ? PCIe_Params[8] : ""), pconf->cache_line, sep);
+	fprintf(fp, "%s0x%X%s",  ((prnt_dir == PRNT_COL) ? PCIe_Params[9] : ""), pconf->lat_timer, sep);
+	fprintf(fp, "%s0x%X%s",  ((prnt_dir == PRNT_COL) ? PCIe_Params[10] : ""), pconf->hdr_type, sep);
+	fprintf(fp, "%s0x%X%s",  ((prnt_dir == PRNT_COL) ? PCIe_Params[11] : ""), pconf->bist, sep);
+	fprintf(fp, "%s0x%X%s",  ((prnt_dir == PRNT_COL) ? PCIe_Params[12] : ""), pconf->bar0, sep);
+	fprintf(fp, "%s0x%X%s",  ((prnt_dir == PRNT_COL) ? PCIe_Params[13] : ""), pconf->bar1, sep);
+	fprintf(fp, "%s0x%X%s",  ((prnt_dir == PRNT_COL) ? PCIe_Params[14] : ""), pconf->bar2, sep);
+	fprintf(fp, "%s0x%X%s",  ((prnt_dir == PRNT_COL) ? PCIe_Params[15] : ""), pconf->bar3, sep);
+	fprintf(fp, "%s0x%X%s",  ((prnt_dir == PRNT_COL) ? PCIe_Params[16] : ""), pconf->bar4, sep);
+	fprintf(fp, "%s0x%X%s",  ((prnt_dir == PRNT_COL) ? PCIe_Params[17] : ""), pconf->bar5, sep);
+	fprintf(fp, "%s0x%X%s",  ((prnt_dir == PRNT_COL) ? PCIe_Params[18] : ""), pconf->card_bus_p, sep);
+	fprintf(fp, "%s0x%X%s",  ((prnt_dir == PRNT_COL) ? PCIe_Params[19] : ""), pconf->subsys_vid, sep);
+	fprintf(fp, "%s0x%X%s",  ((prnt_dir == PRNT_COL) ? PCIe_Params[20] : ""), pconf->subsys_did, sep);
+	fprintf(fp, "%s0x%X%s",  ((prnt_dir == PRNT_COL) ? PCIe_Params[21] : ""), pconf->irq_line, sep);
+	fprintf(fp, "%s0x%X%s",  ((prnt_dir == PRNT_COL) ? PCIe_Params[22] : ""), pconf->irq_pin, sep);
 
 	if (strcmp(sep, "\n"))
 		fprintf(fp, "\n");
 }
+
+static void print_config_param_header(FILE *fp) {
+	int i = 0;
+
+	for (; i < 22; i++) {
+		fprintf(fp, "%s|", PCIe_Params[i]);
+	}
+	fprintf(fp, "%s\n", PCIe_Params[i]);
+}
+
+
+
 
 void cmd_read_all_configs_to_file(void) {
 	char dev_addr[32];
@@ -190,13 +238,16 @@ void cmd_read_all_configs_to_file(void) {
 		exit(1);
 	}
 
+	// print header	on csv file for better column identification
+	print_config_param_header(fp);
+
 	// read pci data of all device and write them to output file
 	sys_command(command, output, MAXLINES);
 	for (int i = 0; i < MAXLINES && output[i] != NULL; i++) {
 		strcpy(dev_addr, strtok(output[i], " "));
 		cmd_get_configs(dev_addr, &pci_config);
 		// print them horizontally with comma as separator
-		cmd_print_configs(fp, &pci_config, "| ");
+		cmd_print_configs(fp, &pci_config, PRNT_ROW);
 		// insert a newline once all parameters are written
 		//fprintf(fp, "\n");
 	}

@@ -53,7 +53,7 @@ void handle_cmd_menu(int cmd) {
 		case MENU_PRINT_CONFIG:
 			pci_config_t pci_config;
 			cmd_get_configs(PCIeDevAddr, &pci_config);
-			cmd_print_configs(stdout, &pci_config, "\n");
+			cmd_print_configs(stdout, &pci_config, PRNT_COL);
 			break;
 		case MENU_READ_ALL_CFG2FILE:
 			cmd_read_all_configs_to_file();

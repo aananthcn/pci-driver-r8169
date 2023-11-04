@@ -3,9 +3,20 @@
 
 #include "pci-types.h"
 
+
+typedef enum {
+	PRNT_ROW, /* print config parameter in a column */
+	PRNT_COL, /* print config parameter in a row */
+	PRNT_MAX
+} prnt_t;
+
+
+
 void cmd_select_device(char dev_addr[]);
-int cmd_get_configs(const char dev_addr[], pci_config_t *pconf);
-void cmd_print_configs(FILE *fp, pci_config_t *pconf, const char *sep);
+int  cmd_get_configs(const char dev_addr[], pci_config_t *pconf);
 void cmd_read_all_configs_to_file(void);
+
+
+void cmd_print_configs(FILE *fp, pci_config_t *pconf, prnt_t prnt_dir);
 
 #endif
