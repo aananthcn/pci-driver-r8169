@@ -13,8 +13,8 @@ typedef enum {
 
 
 void cmd_select_device(char dev_addr[]);
-int  cmd_get_configs(const char dev_addr[], pci_config_t *pconf);
-void cmd_read_all_configs_to_file(void);
+int  cmd_get_config_header(const char dev_addr[], pci_config_t *pconf);
+void cmd_get_all_configs_to_file(void);
 
 
 void cmd_print_configs(FILE *fp, pci_config_t *pconf, prnt_t prnt_dir);

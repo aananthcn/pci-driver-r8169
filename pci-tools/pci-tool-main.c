@@ -50,13 +50,13 @@ void handle_cmd_menu(int cmd) {
 			cmd_select_device(PCIeDevAddr);
 			printf("\nDevice selected is: %s\n", PCIeDevAddr);
 			break;
-		case MENU_PRINT_CONFIG:
+		case MENU_PRINT_CFG_HDR:
 			pci_config_t pci_config;
-			cmd_get_configs(PCIeDevAddr, &pci_config);
+			cmd_get_config_header(PCIeDevAddr, &pci_config);
 			cmd_print_configs(stdout, &pci_config, PRNT_COL);
 			break;
-		case MENU_READ_ALL_CFG2FILE:
-			cmd_read_all_configs_to_file();
+		case MENU_PRINT_CFG2FILE:
+			cmd_get_all_configs_to_file();
 			break;
 		default:
 			printf("\nThe command selected (%d) is not supported yet!\n", cmd);

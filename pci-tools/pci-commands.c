@@ -97,7 +97,7 @@ void get_dev_details(const char dev_addr[], pci_config_t *pconf) {
 }
 
 
-int cmd_get_configs(const char dev_addr[], pci_config_t *pconf) {
+int cmd_get_config_header(const char dev_addr[], pci_config_t *pconf) {
 	int bytes_read;
 	char file_name[128] = "/sys/bus/pci/devices/0000:";
 	unsigned char *buffer = NULL;
@@ -213,7 +213,7 @@ void cmd_print_configs(FILE *fp, pci_config_t *pconf, prnt_t prnt_dir) {
 		fprintf(fp, "\n");
 }
 
-static void print_config_param_header(FILE *fp) {
+static void print_config_param_title(FILE *fp) {
 	int i = 0;
 
 	for (; i < 22; i++) {
@@ -225,7 +225,7 @@ static void print_config_param_header(FILE *fp) {
 
 
 
-void cmd_read_all_configs_to_file(void) {
+void cmd_get_all_configs_to_file(void) {
 	char dev_addr[32];
 	pci_config_t pci_config;
 	char *output[MAXLINES] = { NULL };
@@ -238,18 +238,16 @@ void cmd_read_all_configs_to_file(void) {
 		exit(1);
 	}
 
-	// print header	on csv file for better column identification
-	print_config_param_header(fp);
+	// print title-text on csv file for better column readability
+	print_config_param_title(fp);
 
 	// read pci data of all device and write them to output file
 	sys_command(command, output, MAXLINES);
 	for (int i = 0; i < MAXLINES && output[i] != NULL; i++) {
 		strcpy(dev_addr, strtok(output[i], " "));
-		cmd_get_configs(dev_addr, &pci_config);
+		cmd_get_config_header(dev_addr, &pci_config);
 		// print them horizontally with comma as separator
 		cmd_print_configs(fp, &pci_config, PRNT_ROW);
-		// insert a newline once all parameters are written
-		//fprintf(fp, "\n");
 	}
 
 	if(fp)
