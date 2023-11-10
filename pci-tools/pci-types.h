@@ -12,8 +12,16 @@ typedef struct {
 	unsigned int   class_code;
 	unsigned char  cache_line;
 	unsigned char  lat_timer;
-	unsigned char  hdr_type;
+	unsigned char  hdr_type; /* bits[6:0] decides if type-0 or type-1*/
 	unsigned char  bist;
+	unsigned char  cap_ptr;
+	unsigned char  irq_line;
+	unsigned char  irq_pin;
+} pci_cfg_common_t;
+
+
+typedef struct {
+	pci_cfg_common_t cmn;
 	unsigned int   bar0;
 	unsigned int   bar1;
 	unsigned int   bar2;
@@ -24,8 +32,7 @@ typedef struct {
 	unsigned short subsys_vid;
 	unsigned short subsys_did;
 	unsigned int   exp_rom_ba;
-	unsigned char  irq_line;
-	unsigned char  irq_pin;
-} pci_config_t;
+} pci_cfg_type0_t;
+
 
 #endif

@@ -69,7 +69,7 @@ void cmd_select_device(char dev_addr[]) {
 }
 
 
-void get_dev_details(const char dev_addr[], pci_config_t *pconf) {
+void get_dev_details(const char dev_addr[], pci_cfg_type0_t *pconf) {
 	char *output[MAXLINES] = { NULL };
 	char command[32] = "lspci -s ";
 	strcat(command, dev_addr);
@@ -79,14 +79,14 @@ void get_dev_details(const char dev_addr[], pci_config_t *pconf) {
 		token = strtok(NULL, ":");
 		if (i == 0) {
 			// get the device type
-			strcpy(pconf->device_type, token);
+			strcpy(pconf->cmn.device_type, token);
 		}
 		else if (i == 1) {
 			// remove the leading space
 			if (token[0] == ' ')
 				token++;
 			// get the device details
-			strcpy(pconf->device_str, token);
+			strcpy(pconf->cmn.device_str, token);
 			break;
 		}
 		else {
@@ -97,7 +97,7 @@ void get_dev_details(const char dev_addr[], pci_config_t *pconf) {
 }
 
 
-int cmd_get_config_header(const char dev_addr[], pci_config_t *pconf) {
+int cmd_get_config_header(const char dev_addr[], pci_cfg_type0_t *pconf) {
 	int bytes_read;
 	char file_name[128] = "/sys/bus/pci/devices/0000:";
 	unsigned char *buffer = NULL;
@@ -116,16 +116,19 @@ int cmd_get_config_header(const char dev_addr[], pci_config_t *pconf) {
 	get_dev_details(dev_addr, pconf);
 
 	// read PCI configs - PCIe bytes are always Little Endian
-	pconf->vendor_id  = buffer[0] | (buffer[1] << 8);
-	pconf->device_id  = buffer[2] | (buffer[3] << 8);
-	pconf->cmd_reg    = buffer[4] | (buffer[5] << 8);
-	pconf->stat_reg   = buffer[6] | (buffer[7] << 8);
-	pconf->rev_id     = buffer[8];
-	pconf->class_code = buffer[9] | (buffer[0xa] << 8) | (buffer[0xb] << 16);
-	pconf->cache_line = buffer[0xc];
-	pconf->lat_timer  = buffer[0xd];
-	pconf->hdr_type   = buffer[0xe];
-	pconf->bist       = buffer[0xf];
+	pconf->cmn.vendor_id  = buffer[0] | (buffer[1] << 8);
+	pconf->cmn.device_id  = buffer[2] | (buffer[3] << 8);
+	pconf->cmn.cmd_reg    = buffer[4] | (buffer[5] << 8);
+	pconf->cmn.stat_reg   = buffer[6] | (buffer[7] << 8);
+	pconf->cmn.rev_id     = buffer[8];
+	pconf->cmn.class_code = buffer[9] | (buffer[0xa] << 8) | (buffer[0xb] << 16);
+	pconf->cmn.cache_line = buffer[0xc];
+	pconf->cmn.lat_timer  = buffer[0xd];
+	pconf->cmn.hdr_type   = buffer[0xe];
+	pconf->cmn.bist       = buffer[0xf];
+	pconf->cmn.irq_line   = buffer[0x3c];
+	pconf->cmn.irq_pin    = buffer[0x3d];
+
 	pconf->bar0       = buffer[0x10] | (buffer[0x11] << 8) | (buffer[0x12] << 16) | (buffer[0x13] << 24);
 	pconf->bar1       = buffer[0x14] | (buffer[0x15] << 8) | (buffer[0x16] << 16) | (buffer[0x17] << 24);
 	pconf->bar2       = buffer[0x18] | (buffer[0x19] << 8) | (buffer[0x1a] << 16) | (buffer[0x1b] << 24);
@@ -136,8 +139,6 @@ int cmd_get_config_header(const char dev_addr[], pci_config_t *pconf) {
 	pconf->subsys_vid = buffer[0x2c] | (buffer[0x2d] << 8);
 	pconf->subsys_did = buffer[0x2e] | (buffer[0x2f] << 8);
 	pconf->exp_rom_ba = buffer[0x30] | (buffer[0x31] << 8) | (buffer[0x32] << 16) | (buffer[0x33] << 24);
-	pconf->irq_line   = buffer[0x3c];
-	pconf->irq_pin    = buffer[0x3d];
 
 	// free the buffer allocated by read_binary_file function
 	if (buffer)
@@ -173,7 +174,7 @@ const char *PCIe_Params[] = {
 	"IRQ Pin         : "  /* 22 */
 };
 
-void cmd_print_configs(FILE *fp, pci_config_t *pconf, prnt_t prnt_dir) {
+void cmd_print_configs(FILE *fp, pci_cfg_type0_t *pconf, prnt_t prnt_dir) {
 	char sep[16];
 
 	// prepare the separator string for each parameter
@@ -185,18 +186,20 @@ void cmd_print_configs(FILE *fp, pci_config_t *pconf, prnt_t prnt_dir) {
 	}
 
 	// print configs
-	fprintf(fp, "%s0x%X%s",  ((prnt_dir == PRNT_COL) ? PCIe_Params[0] : ""), pconf->vendor_id, sep);
-	fprintf(fp, "%s0x%X%s",  ((prnt_dir == PRNT_COL) ? PCIe_Params[1] : ""), pconf->device_id, sep);
-	fprintf(fp, "%s%s%s",    ((prnt_dir == PRNT_COL) ? PCIe_Params[2] : ""), pconf->device_type, sep);
-	fprintf(fp, "%s%s%s",    ((prnt_dir == PRNT_COL) ? PCIe_Params[3] : ""), pconf->device_str, sep);
-	fprintf(fp, "%s0x%X%s",  ((prnt_dir == PRNT_COL) ? PCIe_Params[4] : ""), pconf->cmd_reg, sep);
-	fprintf(fp, "%s0x%X%s",  ((prnt_dir == PRNT_COL) ? PCIe_Params[5] : ""), pconf->stat_reg, sep);
-	fprintf(fp, "%s%d%s",    ((prnt_dir == PRNT_COL) ? PCIe_Params[6] : ""), pconf->rev_id, sep);
-	fprintf(fp, "%s0x%X%s",  ((prnt_dir == PRNT_COL) ? PCIe_Params[7] : ""), pconf->class_code, sep);
-	fprintf(fp, "%s0x%X%s",  ((prnt_dir == PRNT_COL) ? PCIe_Params[8] : ""), pconf->cache_line, sep);
-	fprintf(fp, "%s0x%X%s",  ((prnt_dir == PRNT_COL) ? PCIe_Params[9] : ""), pconf->lat_timer, sep);
-	fprintf(fp, "%s0x%X%s",  ((prnt_dir == PRNT_COL) ? PCIe_Params[10] : ""), pconf->hdr_type, sep);
-	fprintf(fp, "%s0x%X%s",  ((prnt_dir == PRNT_COL) ? PCIe_Params[11] : ""), pconf->bist, sep);
+	fprintf(fp, "%s0x%X%s",  ((prnt_dir == PRNT_COL) ? PCIe_Params[0] : ""), pconf->cmn.vendor_id, sep);
+	fprintf(fp, "%s0x%X%s",  ((prnt_dir == PRNT_COL) ? PCIe_Params[1] : ""), pconf->cmn.device_id, sep);
+	fprintf(fp, "%s%s%s",    ((prnt_dir == PRNT_COL) ? PCIe_Params[2] : ""), pconf->cmn.device_type, sep);
+	fprintf(fp, "%s%s%s",    ((prnt_dir == PRNT_COL) ? PCIe_Params[3] : ""), pconf->cmn.device_str, sep);
+	fprintf(fp, "%s0x%X%s",  ((prnt_dir == PRNT_COL) ? PCIe_Params[4] : ""), pconf->cmn.cmd_reg, sep);
+	fprintf(fp, "%s0x%X%s",  ((prnt_dir == PRNT_COL) ? PCIe_Params[5] : ""), pconf->cmn.stat_reg, sep);
+	fprintf(fp, "%s%d%s",    ((prnt_dir == PRNT_COL) ? PCIe_Params[6] : ""), pconf->cmn.rev_id, sep);
+	fprintf(fp, "%s0x%X%s",  ((prnt_dir == PRNT_COL) ? PCIe_Params[7] : ""), pconf->cmn.class_code, sep);
+	fprintf(fp, "%s0x%X%s",  ((prnt_dir == PRNT_COL) ? PCIe_Params[8] : ""), pconf->cmn.cache_line, sep);
+	fprintf(fp, "%s0x%X%s",  ((prnt_dir == PRNT_COL) ? PCIe_Params[9] : ""), pconf->cmn.lat_timer, sep);
+	fprintf(fp, "%s0x%X%s",  ((prnt_dir == PRNT_COL) ? PCIe_Params[10] : ""), pconf->cmn.hdr_type, sep);
+	fprintf(fp, "%s0x%X%s",  ((prnt_dir == PRNT_COL) ? PCIe_Params[11] : ""), pconf->cmn.bist, sep);
+	fprintf(fp, "%s0x%X%s",  ((prnt_dir == PRNT_COL) ? PCIe_Params[21] : ""), pconf->cmn.irq_line, sep);
+	fprintf(fp, "%s0x%X%s",  ((prnt_dir == PRNT_COL) ? PCIe_Params[22] : ""), pconf->cmn.irq_pin, sep);
 	fprintf(fp, "%s0x%X%s",  ((prnt_dir == PRNT_COL) ? PCIe_Params[12] : ""), pconf->bar0, sep);
 	fprintf(fp, "%s0x%X%s",  ((prnt_dir == PRNT_COL) ? PCIe_Params[13] : ""), pconf->bar1, sep);
 	fprintf(fp, "%s0x%X%s",  ((prnt_dir == PRNT_COL) ? PCIe_Params[14] : ""), pconf->bar2, sep);
@@ -206,8 +209,6 @@ void cmd_print_configs(FILE *fp, pci_config_t *pconf, prnt_t prnt_dir) {
 	fprintf(fp, "%s0x%X%s",  ((prnt_dir == PRNT_COL) ? PCIe_Params[18] : ""), pconf->card_bus_p, sep);
 	fprintf(fp, "%s0x%X%s",  ((prnt_dir == PRNT_COL) ? PCIe_Params[19] : ""), pconf->subsys_vid, sep);
 	fprintf(fp, "%s0x%X%s",  ((prnt_dir == PRNT_COL) ? PCIe_Params[20] : ""), pconf->subsys_did, sep);
-	fprintf(fp, "%s0x%X%s",  ((prnt_dir == PRNT_COL) ? PCIe_Params[21] : ""), pconf->irq_line, sep);
-	fprintf(fp, "%s0x%X%s",  ((prnt_dir == PRNT_COL) ? PCIe_Params[22] : ""), pconf->irq_pin, sep);
 
 	if (strcmp(sep, "\n"))
 		fprintf(fp, "\n");
@@ -227,7 +228,7 @@ static void print_config_param_title(FILE *fp) {
 
 void cmd_get_all_configs_to_file(void) {
 	char dev_addr[32];
-	pci_config_t pci_config;
+	pci_cfg_type0_t pci_config;
 	char *output[MAXLINES] = { NULL };
 	char command[] = "lspci";
 
