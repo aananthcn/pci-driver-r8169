@@ -35,4 +35,28 @@ typedef struct {
 } pci_cfg_type0_t;
 
 
+typedef struct {
+	pci_cfg_common_t cmn;
+	unsigned int   bar0;
+	unsigned int   bar1;
+	unsigned char  pri_bus_n;
+	unsigned char  sec_bus_n;
+	unsigned char  sbo_bus_n;
+	unsigned char  sec_lat_tm;
+	unsigned char  io_base;
+	unsigned char  io_limit;
+	unsigned char  sec_status;
+	unsigned short mem_base;
+	unsigned short mem_limit;
+	unsigned short pf_mem_base;
+	unsigned short pf_mem_limit;
+	unsigned int   pf_base_u32;
+	unsigned int   pf_limit_u32;
+	unsigned short io_base_u16;
+	unsigned short io_limit_u16;
+	unsigned int   exp_rom_ba;
+	unsigned short bridge_ctrl;
+} pci_cfg_type1_t;
+
+
 #endif

@@ -126,6 +126,7 @@ int cmd_get_config_header(const char dev_addr[], pci_cfg_type0_t *pconf) {
 	pconf->cmn.lat_timer  = buffer[0xd];
 	pconf->cmn.hdr_type   = buffer[0xe];
 	pconf->cmn.bist       = buffer[0xf];
+	pconf->cmn.cap_ptr    = buffer[0x34];
 	pconf->cmn.irq_line   = buffer[0x3c];
 	pconf->cmn.irq_pin    = buffer[0x3d];
 
@@ -170,8 +171,9 @@ const char *PCIe_Params[] = {
 	"Cardbus CIS Ptr : ", /* 18 */
 	"Subs. Vendor ID : ", /* 19 */
 	"Subs. Device ID : ", /* 20 */
-	"IRQ Line        : ", /* 21 */
-	"IRQ Pin         : "  /* 22 */
+	"Capability Ptr  : ", /* 21 */
+	"IRQ Line        : ", /* 22 */
+	"IRQ Pin         : "  /* 23 */
 };
 
 void cmd_print_configs(FILE *fp, pci_cfg_type0_t *pconf, prnt_t prnt_dir) {
@@ -198,8 +200,6 @@ void cmd_print_configs(FILE *fp, pci_cfg_type0_t *pconf, prnt_t prnt_dir) {
 	fprintf(fp, "%s0x%X%s",  ((prnt_dir == PRNT_COL) ? PCIe_Params[9] : ""), pconf->cmn.lat_timer, sep);
 	fprintf(fp, "%s0x%X%s",  ((prnt_dir == PRNT_COL) ? PCIe_Params[10] : ""), pconf->cmn.hdr_type, sep);
 	fprintf(fp, "%s0x%X%s",  ((prnt_dir == PRNT_COL) ? PCIe_Params[11] : ""), pconf->cmn.bist, sep);
-	fprintf(fp, "%s0x%X%s",  ((prnt_dir == PRNT_COL) ? PCIe_Params[21] : ""), pconf->cmn.irq_line, sep);
-	fprintf(fp, "%s0x%X%s",  ((prnt_dir == PRNT_COL) ? PCIe_Params[22] : ""), pconf->cmn.irq_pin, sep);
 	fprintf(fp, "%s0x%X%s",  ((prnt_dir == PRNT_COL) ? PCIe_Params[12] : ""), pconf->bar0, sep);
 	fprintf(fp, "%s0x%X%s",  ((prnt_dir == PRNT_COL) ? PCIe_Params[13] : ""), pconf->bar1, sep);
 	fprintf(fp, "%s0x%X%s",  ((prnt_dir == PRNT_COL) ? PCIe_Params[14] : ""), pconf->bar2, sep);
@@ -209,6 +209,9 @@ void cmd_print_configs(FILE *fp, pci_cfg_type0_t *pconf, prnt_t prnt_dir) {
 	fprintf(fp, "%s0x%X%s",  ((prnt_dir == PRNT_COL) ? PCIe_Params[18] : ""), pconf->card_bus_p, sep);
 	fprintf(fp, "%s0x%X%s",  ((prnt_dir == PRNT_COL) ? PCIe_Params[19] : ""), pconf->subsys_vid, sep);
 	fprintf(fp, "%s0x%X%s",  ((prnt_dir == PRNT_COL) ? PCIe_Params[20] : ""), pconf->subsys_did, sep);
+	fprintf(fp, "%s0x%X%s",  ((prnt_dir == PRNT_COL) ? PCIe_Params[21] : ""), pconf->cmn.cap_ptr, sep);
+	fprintf(fp, "%s0x%X%s",  ((prnt_dir == PRNT_COL) ? PCIe_Params[22] : ""), pconf->cmn.irq_line, sep);
+	fprintf(fp, "%s0x%X%s",  ((prnt_dir == PRNT_COL) ? PCIe_Params[23] : ""), pconf->cmn.irq_pin, sep);
 
 	if (strcmp(sep, "\n"))
 		fprintf(fp, "\n");
