@@ -3,6 +3,7 @@ INCDIRS  += -I .
 
 PCIETOOLS_OBJS := \
 	pci-commands.o \
+	pci-print.o \
 	sys-utils.o \
 	pci-tool-main.o
 
