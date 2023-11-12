@@ -51,7 +51,7 @@ void handle_cmd_menu(int cmd) {
 			printf("\nDevice selected is: %s\n", PCIeDevAddr);
 			break;
 		case MENU_PRINT_CFG_HDR:
-			pci_cfg_type0_t pci_config;
+			pci_cfg_t pci_config;
 			cmd_get_config_header(PCIeDevAddr, &pci_config);
 			cmd_print_configs(stdout, &pci_config, PRNT_COL);
 			break;

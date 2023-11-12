@@ -59,4 +59,13 @@ typedef struct {
 } pci_cfg_type1_t;
 
 
+typedef struct {
+	pci_cfg_common_t cmn;
+	union {
+		pci_cfg_type0_t t0;
+		pci_cfg_type1_t t1;
+	} u;
+} pci_cfg_t;
+
+
 #endif

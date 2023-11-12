@@ -70,7 +70,7 @@ void cmd_select_device(char dev_addr[]) {
 }
 
 
-static void get_dev_details(const char dev_addr[], pci_cfg_type0_t *pconf) {
+static void get_dev_details(const char dev_addr[], pci_cfg_t *pconf) {
 	char *output[MAXLINES] = { NULL };
 	char command[32] = "lspci -s ";
 	strcat(command, dev_addr);
@@ -98,7 +98,7 @@ static void get_dev_details(const char dev_addr[], pci_cfg_type0_t *pconf) {
 }
 
 
-int cmd_get_config_header(const char dev_addr[], pci_cfg_type0_t *pconf) {
+int cmd_get_config_header(const char dev_addr[], pci_cfg_t *pconf) {
 	int bytes_read;
 	char file_name[128] = "/sys/bus/pci/devices/0000:";
 	unsigned char *buffer = NULL;
@@ -131,16 +131,41 @@ int cmd_get_config_header(const char dev_addr[], pci_cfg_type0_t *pconf) {
 	pconf->cmn.irq_line   = buffer[0x3c];
 	pconf->cmn.irq_pin    = buffer[0x3d];
 
-	pconf->bar0       = buffer[0x10] | (buffer[0x11] << 8) | (buffer[0x12] << 16) | (buffer[0x13] << 24);
-	pconf->bar1       = buffer[0x14] | (buffer[0x15] << 8) | (buffer[0x16] << 16) | (buffer[0x17] << 24);
-	pconf->bar2       = buffer[0x18] | (buffer[0x19] << 8) | (buffer[0x1a] << 16) | (buffer[0x1b] << 24);
-	pconf->bar3       = buffer[0x1c] | (buffer[0x1d] << 8) | (buffer[0x1e] << 16) | (buffer[0x1f] << 24);
-	pconf->bar4       = buffer[0x20] | (buffer[0x21] << 8) | (buffer[0x22] << 16) | (buffer[0x23] << 24);
-	pconf->bar5       = buffer[0x24] | (buffer[0x25] << 8) | (buffer[0x26] << 16) | (buffer[0x27] << 24);
-	pconf->card_bus_p = buffer[0x28] | (buffer[0x29] << 8) | (buffer[0x2a] << 16) | (buffer[0x2b] << 24);
-	pconf->subsys_vid = buffer[0x2c] | (buffer[0x2d] << 8);
-	pconf->subsys_did = buffer[0x2e] | (buffer[0x2f] << 8);
-	pconf->exp_rom_ba = buffer[0x30] | (buffer[0x31] << 8) | (buffer[0x32] << 16) | (buffer[0x33] << 24);
+	if (pconf->cmn.hdr_type & 0x7f) {
+		// Type 1 Config Space Structure
+		pconf->u.t1.bar0         = buffer[0x10] | (buffer[0x11] << 8) | (buffer[0x12] << 16) | (buffer[0x13] << 24);
+		pconf->u.t1.bar1         = buffer[0x14] | (buffer[0x15] << 8) | (buffer[0x16] << 16) | (buffer[0x17] << 24);
+		pconf->u.t1.pri_bus_n    = buffer[0x18];
+		pconf->u.t1.sec_bus_n    = buffer[0x19];
+		pconf->u.t1.sbo_bus_n    = buffer[0x1A];
+		pconf->u.t1.sec_lat_tm   = buffer[0x1B];
+		pconf->u.t1.io_base      = buffer[0x1C];
+		pconf->u.t1.io_limit     = buffer[0x1D];
+		pconf->u.t1.sec_status   = buffer[0x1E] | (buffer[0x1F] << 8);
+		pconf->u.t1.mem_base     = buffer[0x20] | (buffer[0x21] << 8);
+		pconf->u.t1.mem_limit    = buffer[0x22] | (buffer[0x23] << 8);
+		pconf->u.t1.pf_mem_base  = buffer[0x24] | (buffer[0x25] << 8);
+		pconf->u.t1.pf_mem_limit = buffer[0x26] | (buffer[0x27] << 8);
+		pconf->u.t1.pf_base_u32  = buffer[0x28] | (buffer[0x29] << 8) | (buffer[0x2A] << 16) | (buffer[0x2B] << 24);
+		pconf->u.t1.pf_limit_u32 = buffer[0x2C] | (buffer[0x2D] << 8) | (buffer[0x2E] << 16) | (buffer[0x2F] << 24);
+		pconf->u.t1.io_base_u16  = buffer[0x30] | (buffer[0x31] << 8);
+		pconf->u.t1.io_limit_u16 = buffer[0x32] | (buffer[0x33] << 8);
+		pconf->u.t1.exp_rom_ba   = buffer[0x38] | (buffer[0x39] << 8) | (buffer[0x3A] << 16) | (buffer[0x3B] << 24);
+		pconf->u.t1.bridge_ctrl  = buffer[0x3E] | (buffer[0x3F] << 8);
+	}
+	else {
+		// Type 0 Config Space Structure
+		pconf->u.t0.bar0       = buffer[0x10] | (buffer[0x11] << 8) | (buffer[0x12] << 16) | (buffer[0x13] << 24);
+		pconf->u.t0.bar1       = buffer[0x14] | (buffer[0x15] << 8) | (buffer[0x16] << 16) | (buffer[0x17] << 24);
+		pconf->u.t0.bar2       = buffer[0x18] | (buffer[0x19] << 8) | (buffer[0x1a] << 16) | (buffer[0x1b] << 24);
+		pconf->u.t0.bar3       = buffer[0x1c] | (buffer[0x1d] << 8) | (buffer[0x1e] << 16) | (buffer[0x1f] << 24);
+		pconf->u.t0.bar4       = buffer[0x20] | (buffer[0x21] << 8) | (buffer[0x22] << 16) | (buffer[0x23] << 24);
+		pconf->u.t0.bar5       = buffer[0x24] | (buffer[0x25] << 8) | (buffer[0x26] << 16) | (buffer[0x27] << 24);
+		pconf->u.t0.card_bus_p = buffer[0x28] | (buffer[0x29] << 8) | (buffer[0x2a] << 16) | (buffer[0x2b] << 24);
+		pconf->u.t0.subsys_vid = buffer[0x2c] | (buffer[0x2d] << 8);
+		pconf->u.t0.subsys_did = buffer[0x2e] | (buffer[0x2f] << 8);
+		pconf->u.t0.exp_rom_ba = buffer[0x30] | (buffer[0x31] << 8) | (buffer[0x32] << 16) | (buffer[0x33] << 24);
+	}
 
 	// free the buffer allocated by read_binary_file function
 	if (buffer)
@@ -150,7 +175,7 @@ int cmd_get_config_header(const char dev_addr[], pci_cfg_type0_t *pconf) {
 }
 
 
-void cmd_print_configs(FILE *fp, pci_cfg_type0_t *pconf, prnt_t prnt_dir) {
+void cmd_print_configs(FILE *fp, pci_cfg_t *pconf, prnt_t prnt_dir) {
 	char sep[16];
 
 	// prepare the separator string for each parameter
@@ -163,7 +188,14 @@ void cmd_print_configs(FILE *fp, pci_cfg_type0_t *pconf, prnt_t prnt_dir) {
 
 	// print configs
 	print_comn_cfg_params(fp, pconf, prnt_dir, sep);
-	print_type0_cfg_params(fp, pconf, prnt_dir, sep);
+	if (pconf->cmn.hdr_type & 0x7F) {
+		// type 1
+		print_type1_cfg_params(fp, pconf, prnt_dir, sep);
+	}
+	else {
+		// type 0
+		print_type0_cfg_params(fp, pconf, prnt_dir, sep);
+	}
 
 	if (strcmp(sep, "\n"))
 		fprintf(fp, "\n");
@@ -172,7 +204,7 @@ void cmd_print_configs(FILE *fp, pci_cfg_type0_t *pconf, prnt_t prnt_dir) {
 
 void cmd_get_all_configs_to_file(void) {
 	char dev_addr[32];
-	pci_cfg_type0_t pci_config;
+	pci_cfg_t pci_config;
 	char *output[MAXLINES] = { NULL };
 	char command[] = "lspci";
 
@@ -183,16 +215,31 @@ void cmd_get_all_configs_to_file(void) {
 		exit(1);
 	}
 
-	// print title-text on csv file for better column readability
-	print_config_type0_param_title(fp);
-
 	// read pci data of all device and write them to output file
 	sys_command(command, output, MAXLINES);
+
+	// TYPE 0 Configs print
+	print_string(fp, "Type 0 Configs|||||||||||||||||||||||||||||||\n");
+	print_config_type0_param_title(fp);
 	for (int i = 0; i < MAXLINES && output[i] != NULL; i++) {
 		strcpy(dev_addr, strtok(output[i], " "));
 		cmd_get_config_header(dev_addr, &pci_config);
-		// print them horizontally with comma as separator
-		cmd_print_configs(fp, &pci_config, PRNT_ROW);
+		if ((pci_config.cmn.hdr_type & 0x7F) == 0) {
+			// print them horizontally with comma as separator
+			cmd_print_configs(fp, &pci_config, PRNT_ROW);
+		}
+	}
+
+	// TYPE 1 Configs print
+	print_string(fp, "\n\nType 1 Configs\n");
+	print_config_type1_param_title(fp);
+	for (int i = 0; i < MAXLINES && output[i] != NULL; i++) {
+		strcpy(dev_addr, strtok(output[i], " "));
+		cmd_get_config_header(dev_addr, &pci_config);
+		if ((pci_config.cmn.hdr_type & 0x7F) == 1) {
+			// print them horizontally with comma as separator
+			cmd_print_configs(fp, &pci_config, PRNT_ROW);
+		}
 	}
 
 	if(fp)
