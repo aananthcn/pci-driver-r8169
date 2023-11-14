@@ -161,16 +161,51 @@ void print_string(FILE *fp, const char *str) {
 	}
 }
 
+const char *PCIe_PMC_AuxCurr[] = {
+" (self powered)",  /* 0 */
+" (55 mA)",         /* 1 */
+" (100 mA)",        /* 2 */
+" (160 mA)",        /* 3 */
+" (220 mA)",        /* 4 */
+" (270 mA)",        /* 5 */
+" (320 mA)",        /* 6 */
+" (375 mA)"         /* 7 */
+};
 
 const char *PCIe_PwrMgmtCapParams[] = {
-	"Power Management Capabilities (PMC)              : ", /* 0 */
-	"Power Management Control/Status Register (PMCSR) : ", /* 1 */
-	"Data                                             : ", /* 2 */
+	"PMC.version                     : ", /*  0 */
+	"PMC.pme-clock                   : ", /*  1 */
+	"PMC.imm-readiness-on-ret-to-D0  : ", /*  2 */
+	"PMC.dev-specific-initialization : ", /*  3 */
+	"PMC.aux-curent                  : ", /*  4 */
+	"PMC.d1-support                  : ", /*  5 */
+	"PMC.d2-support                  : ", /*  6 */
+	"PMC.pme-support                 : ", /*  7 */
+	"PMCSR.power-state               : ", /*  8 */
+	"PMCSR.no-soft-reset             : ", /*  9 */
+	"PMCSR.pme-en                    : ", /* 10 */
+	"PMCSR.data-select               : ", /* 11 */
+	"PMCSR.data-scale                : ", /* 12 */
+	"PMCSR.pme-status                : ", /* 13 */
+	"Data                            : ", /* 14 */
 };
-#define PCIE_PWR_MGMT_CAP_PAR_SIZE	3
+#define PCIE_PWR_MGMT_CAP_PAR_SIZE	15
 
 void print_pwr_mgmt_cap_params(FILE *fp, pci_pmr_mgmt_cap_t *pconf, prnt_t prnt_dir, const char *sep) {
-	fprintf(fp, "%s0x%X%s",  ((prnt_dir == PRNT_COL) ? PCIe_PwrMgmtCapParams[0] : ""), pconf->pmc, sep);
-	fprintf(fp, "%s0x%X%s",  ((prnt_dir == PRNT_COL) ? PCIe_PwrMgmtCapParams[1] : ""), pconf->pmcsr, sep);
-	fprintf(fp, "%s0x%X%s",  ((prnt_dir == PRNT_COL) ? PCIe_PwrMgmtCapParams[2] : ""), pconf->data, sep);
+	fprintf(fp, "%s0x%02X%s",  ((prnt_dir == PRNT_COL) ? PCIe_PwrMgmtCapParams[0] : ""), (pconf->pmc & 0x0007), sep);
+	fprintf(fp, "%s0x%02X%s",  ((prnt_dir == PRNT_COL) ? PCIe_PwrMgmtCapParams[1] : ""), (pconf->pmc & 0x0008) >> 3, sep);
+	fprintf(fp, "%s0x%02X%s",  ((prnt_dir == PRNT_COL) ? PCIe_PwrMgmtCapParams[2] : ""), (pconf->pmc & 0x0010) >> 4, sep);
+	fprintf(fp, "%s0x%02X%s",  ((prnt_dir == PRNT_COL) ? PCIe_PwrMgmtCapParams[3] : ""), (pconf->pmc & 0x0020) >> 5, sep);
+	int aux_curr = (pconf->pmc & 0x01C0) >> 6;
+	fprintf(fp, "%s0x%02X%s%s",  ((prnt_dir == PRNT_COL) ? PCIe_PwrMgmtCapParams[4] : ""), aux_curr, PCIe_PMC_AuxCurr[aux_curr], sep);
+	fprintf(fp, "%s0x%02X%s",  ((prnt_dir == PRNT_COL) ? PCIe_PwrMgmtCapParams[5] : ""), (pconf->pmc & 0x0200) >> 9, sep);
+	fprintf(fp, "%s0x%02X%s",  ((prnt_dir == PRNT_COL) ? PCIe_PwrMgmtCapParams[6] : ""), (pconf->pmc & 0x0400) >> 10, sep);
+	fprintf(fp, "%s0x%02X%s",  ((prnt_dir == PRNT_COL) ? PCIe_PwrMgmtCapParams[7] : ""), (pconf->pmc & 0xF800) >> 11, sep);
+	fprintf(fp, "%s0x%02X%s",  ((prnt_dir == PRNT_COL) ? PCIe_PwrMgmtCapParams[8] : ""),  (pconf->pmcsr & 0x0003), sep);
+	fprintf(fp, "%s0x%02X%s",  ((prnt_dir == PRNT_COL) ? PCIe_PwrMgmtCapParams[9] : ""),  (pconf->pmcsr & 0x0008) >> 3, sep);
+	fprintf(fp, "%s0x%02X%s",  ((prnt_dir == PRNT_COL) ? PCIe_PwrMgmtCapParams[10] : ""), (pconf->pmcsr & 0x0100) >> 8, sep);
+	fprintf(fp, "%s0x%02X%s",  ((prnt_dir == PRNT_COL) ? PCIe_PwrMgmtCapParams[11] : ""), (pconf->pmcsr & 0x1E00) >> 9, sep);
+	fprintf(fp, "%s0x%02X%s",  ((prnt_dir == PRNT_COL) ? PCIe_PwrMgmtCapParams[12] : ""), (pconf->pmcsr & 0x6000) >> 13, sep);
+	fprintf(fp, "%s0x%02X%s",  ((prnt_dir == PRNT_COL) ? PCIe_PwrMgmtCapParams[13] : ""), (pconf->pmcsr & 0x8000) >> 14, sep);
+	fprintf(fp, "%s0x%02X%s",  ((prnt_dir == PRNT_COL) ? PCIe_PwrMgmtCapParams[14] : ""), pconf->data, sep);
 }
