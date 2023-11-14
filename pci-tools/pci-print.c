@@ -160,3 +160,17 @@ void print_string(FILE *fp, const char *str) {
 		fprintf(fp, "%s", str);
 	}
 }
+
+
+const char *PCIe_PwrMgmtCapParams[] = {
+	"Power Management Capabilities (PMC)              : ", /* 0 */
+	"Power Management Control/Status Register (PMCSR) : ", /* 1 */
+	"Data                                             : ", /* 2 */
+};
+#define PCIE_PWR_MGMT_CAP_PAR_SIZE	3
+
+void print_pwr_mgmt_cap_params(FILE *fp, pci_pmr_mgmt_cap_t *pconf, prnt_t prnt_dir, const char *sep) {
+	fprintf(fp, "%s0x%X%s",  ((prnt_dir == PRNT_COL) ? PCIe_PwrMgmtCapParams[0] : ""), pconf->pmc, sep);
+	fprintf(fp, "%s0x%X%s",  ((prnt_dir == PRNT_COL) ? PCIe_PwrMgmtCapParams[1] : ""), pconf->pmcsr, sep);
+	fprintf(fp, "%s0x%X%s",  ((prnt_dir == PRNT_COL) ? PCIe_PwrMgmtCapParams[2] : ""), pconf->data, sep);
+}

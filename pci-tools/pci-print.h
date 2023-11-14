@@ -12,4 +12,7 @@ void print_config_type1_param_title(FILE *fp);
 
 void print_string(FILE *fp, const char *str);
 
+void print_pwr_mgmt_cap_params(FILE *fp, pci_pmr_mgmt_cap_t *pconf, prnt_t prnt_dir, const char *sep);
+
+
 #endif

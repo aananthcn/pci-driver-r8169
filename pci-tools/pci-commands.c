@@ -219,7 +219,7 @@ void cmd_get_all_configs_to_file(void) {
 	sys_command(command, output, MAXLINES);
 
 	// TYPE 0 Configs print
-	print_string(fp, "Type 0 Configs|||||||||||||||||||||||||||||||\n");
+	print_string(fp, "Type 0 Configs|||||||||||||||||||||||||||||||\n"); // these additional '|' are needed to satisfy Microsoft's CSV file reading bug.
 	print_config_type0_param_title(fp);
 	for (int i = 0; i < MAXLINES && output[i] != NULL; i++) {
 		strcpy(dev_addr, strtok(output[i], " "));
@@ -244,4 +244,67 @@ void cmd_get_all_configs_to_file(void) {
 
 	if(fp)
 		fclose(fp);
+}
+
+
+
+void cmd_print_power_mgmt_caps(const char dev_addr[], FILE *fp, pci_cfg_t *pconf, prnt_t prnt_dir) {
+	char sep[16];
+	unsigned char pmc_offset;
+	unsigned char cap_offset;
+
+	int bytes_read;
+	char file_name[128] = "/sys/bus/pci/devices/0000:";
+	unsigned char *buffer = NULL;
+
+	// formulate the filename with path to read the config
+	strcat(file_name, dev_addr);
+	strcat(file_name, "/config");
+	printf("\nReading file: %s\n", file_name);
+
+	// read the file contents into the buffer passed by argument
+	bytes_read = read_binary_file(file_name, &buffer);
+	printf("Bytes read = %d\n", bytes_read);
+	dump_buffer_hex(buffer, bytes_read);
+
+	// prepare the separator string for each parameter
+	if (prnt_dir == PRNT_COL ) {
+		strcpy(sep, "\n");
+	}
+	else {
+		strcpy(sep, "|");
+	}
+
+	// get the PMC offset
+	cap_offset = pconf->cmn.cap_ptr & 0xFC; //mask the last 2 bits
+	for (int i = 0; i < (256 / 8); i++) { // PMC should be placed within the first 256 bytes
+		if (buffer[cap_offset] == PWR_MGMT_CAPABILITY_ID) {
+			// we found the capability structure
+			pmc_offset = cap_offset;
+			fprintf(fp, "Found Pwr. Mgmt. Capability at offset = 0x%02X\n", pmc_offset);
+			break;
+		}
+		else if (buffer[cap_offset+1]) {
+			cap_offset = buffer[cap_offset+1];
+			continue;
+		}
+		else {
+			fprintf(fp, "ERROR: No Power Management Capabilty found for PCIe device %s\n", dev_addr);
+			goto pmc_exit;
+		}
+	}
+
+	pci_pmr_mgmt_cap_t pmc_cap;
+
+	pmc_cap.pmc   = buffer[pmc_offset+2] | (buffer[pmc_offset+3] << 8);
+	pmc_cap.pmcsr = buffer[pmc_offset+4] | (buffer[pmc_offset+5] << 8);
+	pmc_cap.data  = buffer[pmc_offset+7];
+
+	print_string(stdout, "\n\n");
+	print_pwr_mgmt_cap_params(stdout, &pmc_cap, PRNT_COL, "\n");
+
+pmc_exit:
+	// free the buffer allocated by read_binary_file function
+	if (buffer)
+		free(buffer);
 }

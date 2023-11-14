@@ -1,6 +1,12 @@
 #ifndef PCI_TYPES_DOT_H
 #define PCI_TYPES_DOT_H
 
+// Macros
+#define PWR_MGMT_CAPABILITY_ID	0x01
+
+
+// types
+
 typedef struct {
 	unsigned short vendor_id;
 	unsigned short device_id;
@@ -66,6 +72,13 @@ typedef struct {
 		pci_cfg_type1_t t1;
 	} u;
 } pci_cfg_t;
+
+
+typedef struct {
+	unsigned short pmc;
+	unsigned short pmcsr;
+	unsigned short data;
+} pci_pmr_mgmt_cap_t;
 
 
 #endif
