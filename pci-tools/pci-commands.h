@@ -19,5 +19,6 @@ void cmd_get_all_configs_to_file(void);
 
 void cmd_print_configs(FILE *fp, pci_cfg_t *pconf, prnt_t prnt_dir);
 void cmd_print_power_mgmt_caps(const char dev_addr[], FILE *fp, pci_cfg_t *pconf, prnt_t prnt_dir);
+void cmd_print_extended_caps(const char dev_addr[], FILE *fp, pci_cfg_t *pconf, prnt_t prnt_dir);
 
 #endif

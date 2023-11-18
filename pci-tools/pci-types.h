@@ -81,4 +81,11 @@ typedef struct {
 } pci_pmr_mgmt_cap_t;
 
 
+typedef struct {
+	unsigned short cap_id;
+	unsigned char cap_ver;
+	unsigned short next_cap_ptr;
+} pci_ext_cap_t;
+
+
 #endif

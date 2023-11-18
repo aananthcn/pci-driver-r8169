@@ -100,12 +100,11 @@ static void get_dev_details(const char dev_addr[], pci_cfg_t *pconf) {
 
 int cmd_get_config_header(const char dev_addr[], pci_cfg_t *pconf) {
 	int bytes_read;
-	char file_name[128] = "/sys/bus/pci/devices/0000:";
+	char file_name[128];
 	unsigned char *buffer = NULL;
 
 	// formulate the filename with path to read the config
-	strcat(file_name, dev_addr);
-	strcat(file_name, "/config");
+	prep_pci_cfg_filename_str(file_name, dev_addr);
 	printf("\nReading file: %s\n", file_name);
 
 	// read the file contents into the buffer passed by argument
@@ -254,12 +253,11 @@ void cmd_print_power_mgmt_caps(const char dev_addr[], FILE *fp, pci_cfg_t *pconf
 	unsigned char cap_offset;
 
 	int bytes_read;
-	char file_name[128] = "/sys/bus/pci/devices/0000:";
+	char file_name[128];
 	unsigned char *buffer = NULL;
 
 	// formulate the filename with path to read the config
-	strcat(file_name, dev_addr);
-	strcat(file_name, "/config");
+	prep_pci_cfg_filename_str(file_name, dev_addr);
 	printf("\nReading file: %s\n", file_name);
 
 	// read the file contents into the buffer passed by argument
@@ -304,6 +302,51 @@ void cmd_print_power_mgmt_caps(const char dev_addr[], FILE *fp, pci_cfg_t *pconf
 	print_pwr_mgmt_cap_params(stdout, &pmc_cap, PRNT_COL, "\n");
 
 pmc_exit:
+	// free the buffer allocated by read_binary_file function
+	if (buffer)
+		free(buffer);
+}
+
+
+
+void cmd_print_extended_caps(const char dev_addr[], FILE *fp, pci_cfg_t *pconf, prnt_t prnt_dir) {
+	char sep[16];
+	unsigned short ext_offset;
+
+	int bytes_read;
+	char file_name[128];
+	unsigned char *buffer = NULL;
+
+	// formulate the filename with path to read the config
+	prep_pci_cfg_filename_str(file_name, dev_addr);
+	printf("\nReading file: %s\n", file_name);
+
+	// read the file contents into the buffer passed by argument
+	bytes_read = read_binary_file(file_name, &buffer);
+	printf("Bytes read = %d\n", bytes_read);
+	dump_buffer_hex(buffer, bytes_read);
+
+	// prepare the separator string for each parameter
+	if (prnt_dir == PRNT_COL ) {
+		strcpy(sep, "\n");
+	}
+	else {
+		strcpy(sep, "|");
+	}
+
+	// get the extended capability offset
+	ext_offset = 0x100;
+	pci_ext_cap_t ext_cap;
+
+	ext_cap.cap_id       = buffer[ext_offset+0] | (buffer[ext_offset+1] << 8);
+	ext_cap.cap_ver	     = buffer[ext_offset+2] & 0x0F;
+	ext_cap.next_cap_ptr = (buffer[ext_offset+2] & 0xF0) >> 4 | 
+	                       (buffer[ext_offset+3] << 4);
+
+	print_string(stdout, "\n\n");
+	print_ext_cap_params(stdout, &ext_cap, PRNT_COL, "\n");
+
+ext_exit:
 	// free the buffer allocated by read_binary_file function
 	if (buffer)
 		free(buffer);

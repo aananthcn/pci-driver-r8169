@@ -162,14 +162,14 @@ void print_string(FILE *fp, const char *str) {
 }
 
 const char *PCIe_PMC_AuxCurr[] = {
-" (self powered)",  /* 0 */
-" (55 mA)",         /* 1 */
-" (100 mA)",        /* 2 */
-" (160 mA)",        /* 3 */
-" (220 mA)",        /* 4 */
-" (270 mA)",        /* 5 */
-" (320 mA)",        /* 6 */
-" (375 mA)"         /* 7 */
+        " (self powered)", /* 0 */
+        " (55 mA)",	   /* 1 */
+        " (100 mA)",       /* 2 */
+        " (160 mA)",       /* 3 */
+        " (220 mA)",       /* 4 */
+        " (270 mA)",       /* 5 */
+        " (320 mA)",       /* 6 */
+        " (375 mA)"	   /* 7 */
 };
 
 const char *PCIe_PwrMgmtCapParams[] = {
@@ -208,4 +208,20 @@ void print_pwr_mgmt_cap_params(FILE *fp, pci_pmr_mgmt_cap_t *pconf, prnt_t prnt_
 	fprintf(fp, "%s0x%02X%s",  ((prnt_dir == PRNT_COL) ? PCIe_PwrMgmtCapParams[12] : ""), (pconf->pmcsr & 0x6000) >> 13, sep);
 	fprintf(fp, "%s0x%02X%s",  ((prnt_dir == PRNT_COL) ? PCIe_PwrMgmtCapParams[13] : ""), (pconf->pmcsr & 0x8000) >> 14, sep);
 	fprintf(fp, "%s0x%02X%s",  ((prnt_dir == PRNT_COL) ? PCIe_PwrMgmtCapParams[14] : ""), pconf->data, sep);
+}
+
+
+
+
+const char *PCIe_ExtCapParams[] = {
+	"Ext. Capability ID        : ", /*  0 */
+	"Ext. Cap. Version Number  : ", /*  1 */
+	"Next Capability Offset    : "  /*  2 */
+};
+#define PCIE_EXT_CAP_PAR_SIZE	3
+
+void print_ext_cap_params(FILE *fp, pci_ext_cap_t *pconf, prnt_t prnt_dir, const char *sep) {
+	fprintf(fp, "%s0x%02X%s",  ((prnt_dir == PRNT_COL) ? PCIe_ExtCapParams[0] : ""), pconf->cap_id, sep);
+	fprintf(fp, "%s0x%02X%s",  ((prnt_dir == PRNT_COL) ? PCIe_ExtCapParams[1] : ""), pconf->cap_ver, sep);
+	fprintf(fp, "%s0x%02X%s",  ((prnt_dir == PRNT_COL) ? PCIe_ExtCapParams[2] : ""), pconf->next_cap_ptr, sep);
 }

@@ -1,5 +1,14 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
+
+
+void prep_pci_cfg_filename_str(char *file_name, const char *dev_addr) {
+	file_name[0] = '\0'; // flush old contents
+	strcat(file_name, "/sys/bus/pci/devices/0000:");
+	strcat(file_name, dev_addr);
+	strcat(file_name, "/config");
+}
 
 
 int read_binary_file(const char *filename, unsigned char *buffer[])

@@ -63,6 +63,10 @@ void handle_cmd_menu(int cmd) {
 			cmd_get_config_header(PCIeDevAddr, &pci_config);
 			cmd_print_power_mgmt_caps(PCIeDevAddr, stdout, &pci_config, PRNT_COL);
 			break;
+		case MENU_PRINT_EXTENDED_CAP:
+			cmd_get_config_header(PCIeDevAddr, &pci_config);
+			cmd_print_extended_caps(PCIeDevAddr, stdout, &pci_config, PRNT_COL);
+			break;
 		default:
 			printf("\nThe command selected (%d) is not supported yet!\n", cmd);
 			break;
