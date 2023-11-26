@@ -1,4 +1,4 @@
-# pci-driver-r8169
+# drv-r8169
 A repo to explore &amp; learn PCIe driver for PCIe Card TP-Link TG-3468 Gigabit PCI Express Network Adapter
 
 
@@ -14,8 +14,8 @@ A repo to explore &amp; learn PCIe driver for PCIe Card TP-Link TG-3468 Gigabit 
 
 ## How to build this driver
 * Just clone this repo and following the steps below:
-  * `git clone https://github.com/aananthcn/pci-driver-r8169.git`
-  * `cd pci-driver-r8169`
+  * `git clone https://github.com/aananthcn/drv-r8169.git`
+  * `cd drv-r8169`
   * `make`
 * search for *.ko file, that is our new driver!!
 
@@ -28,7 +28,7 @@ By default Linux will probe the PCIe card and load the driver. We first need to 
 * Now it is time to unload the driver module from the kernel.
   * `sudo rmmod r8169`
 * Insert the newly built kernel module
-  * `sudo insmod pci-driver-r8169.ko`
+  * `sudo insmod my-r8169.ko`
 * Verify if our driver module has claimed the hardware device by following the steps below:
   * `sudo lshw -class network`
   * Then search for text: "configuration: driver=pci_r8169"
