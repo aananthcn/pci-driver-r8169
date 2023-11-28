@@ -72,8 +72,8 @@ enum mac_version {
 
 struct rtl8169_private;
 
-void r8169_apply_firmware(struct rtl8169_private *tp);
-u16 rtl8168h_2_get_adc_bias_ioffset(struct rtl8169_private *tp);
-u8 rtl8168d_efuse_read(struct rtl8169_private *tp, int reg_addr);
-void r8169_hw_phy_config(struct rtl8169_private *tp, struct phy_device *phydev,
+void r8169_apply_firmware(struct rtl8169_private *rtl_p);
+u16 rtl8168h_2_get_adc_bias_ioffset(struct rtl8169_private *rtl_p);
+u8 rtl8168d_efuse_read(struct rtl8169_private *rtl_p, int reg_addr);
+void r8169_hw_phy_config(struct rtl8169_private *rtl_p, struct phy_device *phydev,
 			 enum mac_version ver);

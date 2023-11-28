@@ -10,8 +10,6 @@ ifneq ($(KERNELRELEASE),)
 				r8169_firmware.o \
 				r8169_phy_config.o
 
-#				drv-r8169.o \
-
 # Otherwise we were called directly from the command
 # line; invoke the kernel build system.
 else

@@ -12,8 +12,8 @@
 #include <linux/firmware.h>
 
 struct rtl8169_private;
-typedef void (*rtl_fw_write_t)(struct rtl8169_private *tp, int reg, int val);
-typedef int (*rtl_fw_read_t)(struct rtl8169_private *tp, int reg);
+typedef void (*rtl_fw_write_t)(struct rtl8169_private *rtl_p, int reg, int val);
+typedef int (*rtl_fw_read_t)(struct rtl8169_private *rtl_p, int reg);
 
 #define RTL_VER_SIZE		32
 
@@ -36,4 +36,4 @@ struct rtl_fw {
 
 int rtl_fw_request_firmware(struct rtl_fw *rtl_fw);
 void rtl_fw_release_firmware(struct rtl_fw *rtl_fw);
-void rtl_fw_write_firmware(struct rtl8169_private *tp, struct rtl_fw *rtl_fw);
+void rtl_fw_write_firmware(struct rtl8169_private *rtl_p, struct rtl_fw *rtl_fw);
